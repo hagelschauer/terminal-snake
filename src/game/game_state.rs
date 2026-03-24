@@ -36,7 +36,7 @@ impl GameState {
     pub fn shuffle_apple(&mut self) {
         let avaliable_positions: Vec<(u16, u16)> = (0..WIDTH)
             .flat_map(|x| (0..HEIGHT).map(move |y| (x, y)))
-            .filter(|pos| !self.snake.occupies_position(*pos))
+            .filter(|pos| self.snake.occupies_position(*pos).is_none())
             .collect();
 
         self.apple_pos = avaliable_positions[self.rng.random_range(0..avaliable_positions.len())]
