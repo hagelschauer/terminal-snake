@@ -46,7 +46,10 @@ impl Snake {
         }
 
         let in_front = self.head.direction.apply(self.head.position);
-        self.occupies_position(in_front)
+        match self.occupies_position(in_front) {
+            Some(segment) => segment.next.is_some(),
+            _ => false,
+        }
     }
 
     pub fn turn(&mut self, direction: Direction) {
@@ -56,15 +59,15 @@ impl Snake {
         self.head.direction = direction;
     }
 
-    pub fn occupies_position(&self, pos: (u16, u16)) -> bool {
+    pub fn occupies_position(&self, pos: (u16, u16)) -> Option<&Box<SnakeSegment>> {
         let mut snake_segment = &self.head;
         while let Some(next) = &snake_segment.next {
             if next.position == pos {
-                return true;
+                return Some(next);
             }
             snake_segment = next;
         }
 
-        false
+        None
     }
 }
