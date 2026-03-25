@@ -12,8 +12,8 @@ impl Direction {
     pub fn apply(self, (x, y): (u16, u16)) -> (u16, u16) {
         match self {
             Direction::Up => (x, y - 1),
-            Direction::Right => (x + 1, y),
             Direction::Down => (x, y + 1),
+            Direction::Right => (x + 1, y),
             Direction::Left => (x - 1, y),
         }
     }
@@ -25,8 +25,8 @@ impl Neg for Direction {
     fn neg(self) -> Self::Output {
         match self {
             Self::Up => Self::Down,
-            Self::Right => Self::Left,
             Self::Down => Self::Up,
+            Self::Right => Self::Left,
             Self::Left => Self::Right,
         }
     }

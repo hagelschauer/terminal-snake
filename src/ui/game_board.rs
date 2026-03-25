@@ -1,12 +1,20 @@
-use ratatui::{buffer::Buffer, layout::Rect, style::Style, widgets::StatefulWidget};
+use ratatui::{
+    buffer::Buffer,
+    layout::Rect,
+    style::{Color, Style},
+    widgets::StatefulWidget,
+};
 
 use crate::{
+    direction::Direction,
     game::{
         GameState, Snake,
         game_state::{HEIGHT, WIDTH},
         snake::SnakeSegment,
     },
-    ui::drawings::{APPLE, APPLE_COLOR, SNAKE_COLOR},
+    ui::drawings::{
+        APPLE, APPLE_COLOR, SNAKE_BASE, SNAKE_COLOR, SNAKE_DOWN, SNAKE_LEFT, SNAKE_RIGHT, SNAKE_UP,
+    },
 };
 
 pub const CELL_WIDTH: u16 = 4;
@@ -27,12 +35,38 @@ impl StatefulWidget for GameBoard {
     }
 }
 
-fn draw_apple(x: u16, y: u16, area: Rect, buf: &mut Buffer) {
+fn draw_drawing(
+    x: u16,
+    y: u16,
+    area: Rect,
+    buf: &mut Buffer,
+    drawing: [[char; 4]; 2],
+    color: Color,
+) {
     let (x, y) = (area.x + x * CELL_WIDTH, area.y + y * CELL_HEIGHT);
-    let style = Style::default().fg(APPLE_COLOR);
-    for (dy, line) in APPLE.iter().enumerate() {
-        buf.set_string(x, y + dy as u16, line, style);
+    let style = Style::default().fg(color);
+    for (dy, line) in drawing.iter().enumerate() {
+        for (dx, char) in line.iter().enumerate() {
+            buf.cell_mut((x + dx as u16, y + dy as u16))
+                .map(|cell| cell.set_char(*char).set_style(style));
+        }
     }
+}
+
+fn draw_over(base: [[char; 4]; 2], on_top: [[char; 4]; 2]) -> [[char; 4]; 2] {
+    let mut base = base;
+    for (y, line) in on_top.iter().enumerate() {
+        for (x, char) in line.iter().enumerate() {
+            if !char.is_whitespace() {
+                base[y][x] = *char;
+            }
+        }
+    }
+    base
+}
+
+fn draw_apple(x: u16, y: u16, area: Rect, buf: &mut Buffer) {
+    draw_drawing(x, y, area, buf, APPLE, APPLE_COLOR);
 }
 
 fn draw_snake(snake: &Snake, area: Rect, buf: &mut Buffer) {
@@ -42,11 +76,30 @@ fn draw_snake(snake: &Snake, area: Rect, buf: &mut Buffer) {
 fn draw_snake_segment(segment: &SnakeSegment, area: Rect, buf: &mut Buffer) {
     let (x, y) = segment.position;
 
-    let (x, y) = (area.x + x * CELL_WIDTH, area.y + y * CELL_HEIGHT);
-    let style = Style::default().fg(SNAKE_COLOR);
-    for (dy, line) in APPLE.iter().enumerate() {
-        buf.set_string(x, y + dy as u16, line, style);
+    let mut drawing = SNAKE_BASE;
+    drawing = draw_over(
+        drawing,
+        match segment.direction {
+            Direction::Up => SNAKE_UP,
+            Direction::Down => SNAKE_DOWN,
+            Direction::Left => SNAKE_LEFT,
+            Direction::Right => SNAKE_RIGHT,
+        },
+    );
+
+    if let Some(next) = &segment.next {
+        drawing = draw_over(
+            drawing,
+            match next.direction {
+                Direction::Up => SNAKE_DOWN,
+                Direction::Down => SNAKE_UP,
+                Direction::Left => SNAKE_RIGHT,
+                Direction::Right => SNAKE_LEFT,
+            },
+        );
     }
+
+    draw_drawing(x, y, area, buf, drawing, SNAKE_COLOR);
 
     if let Some(next) = &segment.next {
         draw_snake_segment(next, area, buf);
