@@ -1,9 +1,10 @@
-use crate::direction::Direction;
+use crate::{direction::Direction, game::snake::SnakeSegmentType};
 
 pub struct SnakeSegment {
     pub position: (u16, u16),
     pub direction: Direction,
     pub next: Option<Box<SnakeSegment>>,
+    pub segment_type: SnakeSegmentType
 }
 
 impl SnakeSegment {
@@ -25,6 +26,7 @@ impl SnakeSegment {
             position: old_position,
             direction: self.direction,
             next: old_next,
+            segment_type: SnakeSegmentType::Body
         }))
     }
 }

@@ -1,5 +1,8 @@
-pub mod snake_segment;
+mod snake_segment;
+mod snake_segment_type;
+
 pub use snake_segment::SnakeSegment;
+pub use snake_segment_type::SnakeSegmentType;
 
 use crate::{
     direction::Direction,
@@ -22,7 +25,9 @@ impl Snake {
                     position: (x - 1, y),
                     direction: Direction::Right,
                     next: None,
+                    segment_type: SnakeSegmentType::Tail,
                 })),
+                segment_type: SnakeSegmentType::Head,
             },
         }
     }
@@ -59,7 +64,7 @@ impl Snake {
         self.head.direction = direction;
     }
 
-    pub fn occupies_position(&self, pos: (u16, u16)) -> Option<&Box<SnakeSegment>> {
+    pub fn occupies_position(&self, pos: (u16, u16)) -> Option<&SnakeSegment> {
         let mut snake_segment = &self.head;
         while let Some(next) = &snake_segment.next {
             if next.position == pos {

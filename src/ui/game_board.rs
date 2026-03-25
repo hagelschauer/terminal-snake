@@ -10,7 +10,7 @@ use crate::{
     game::{
         GameState, Snake,
         game_state::{HEIGHT, WIDTH},
-        snake::SnakeSegment,
+        snake::{SnakeSegment, SnakeSegmentType},
     },
     ui::drawings::{
         APPLE, APPLE_COLOR, SNAKE_BASE, SNAKE_COLOR, SNAKE_DOWN, SNAKE_LEFT, SNAKE_RIGHT, SNAKE_UP,
@@ -77,15 +77,18 @@ fn draw_snake_segment(segment: &SnakeSegment, area: Rect, buf: &mut Buffer) {
     let (x, y) = segment.position;
 
     let mut drawing = SNAKE_BASE;
-    drawing = draw_over(
-        drawing,
-        match segment.direction {
-            Direction::Up => SNAKE_UP,
-            Direction::Down => SNAKE_DOWN,
-            Direction::Left => SNAKE_LEFT,
-            Direction::Right => SNAKE_RIGHT,
-        },
-    );
+
+    if segment.segment_type != SnakeSegmentType::Head {
+        drawing = draw_over(
+            drawing,
+            match segment.direction {
+                Direction::Up => SNAKE_UP,
+                Direction::Down => SNAKE_DOWN,
+                Direction::Left => SNAKE_LEFT,
+                Direction::Right => SNAKE_RIGHT,
+            },
+        );
+    }
 
     if let Some(next) = &segment.next {
         drawing = draw_over(
